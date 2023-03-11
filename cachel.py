@@ -6,18 +6,11 @@ import httpx
 
 
 class WaybackMachineDownloader:
-    def __init__(self):
-        self.url = "https://web.archive.org/web"
-
     def get_timestamps(self, url):
-        response = requests.get(f"{self.url}/timemap/json/{url}")
-        timestamps = []
-        for line in response.content.decode().splitlines():
-            if 'timestamp' in line:
-                timestamp = line.split(':')[1].split('T')[0].replace('"', '').strip()
-                timestamps.append(f"{self.url}/{timestamp}/{url}")
-        return timestamps
-
+        response = requests.get(f"https://web.archive.org/cdx/search/cdx?url={url}&output=json&fl=timestamp")
+        timestamps = response.json()[1:]
+        urls = [f"https://web.archive.org/web/{timestamp}/{url}" for timestamp in timestamps]
+        return urls
 
 # Step 1: Parse command line arguments
 parser = argparse.ArgumentParser(description='Check subdomains for cached .js files')
