@@ -7,10 +7,19 @@ import httpx
 
 class WaybackMachineDownloader:
     def get_timestamps(self, url):
-        response = requests.get(f"https://web.archive.org/cdx/search/cdx?url={url}&output=json&fl=timestamp")
-        timestamps = response.json()[1:]
-        urls = [f"https://web.archive.org/web/{timestamp}/{url}" for timestamp in timestamps]
-        return urls
+    # Add 'http://' or 'https://' prefix to url if it doesn't already have one
+    if not url.startswith('http://') and not url.startswith('https://'):
+        url = f'http://{url}'
+
+    # Encode url to be used in the request URL
+    encoded_url = urllib.parse.quote(url)
+
+    # Send GET request to Wayback Machine's CDX API
+    response = requests.get(f"https://web.archive.org/cdx/search/cdx?url={encoded_url}&output=json&fl=timestamp")
+
+    # Parse response to get timestamps
+    timestamps = [row[1] for row in response.json()[1:]]
+    return [self.get_url_from_timestamp(url, timestamp) for timestamp in timestamps]
 
 # Step 1: Parse command line arguments
 parser = argparse.ArgumentParser(description='Check subdomains for cached .js files')
