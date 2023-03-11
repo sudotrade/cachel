@@ -11,7 +11,7 @@
 ## pip install -r requirements.txt
 
 ## then 
-'python script.py -t example.com -o example.txt'
+#python script.py -t example.com -o example.txt
 
 
 ##next 
