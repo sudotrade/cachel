@@ -1,25 +1,20 @@
+import argparse
 import requests
 from bs4 import BeautifulSoup
-from waybackpy import WaybackMachineDownloader
-from assetfinder import AssetFinder
-from httpx import Client
+import subprocess
 
-# Step 1: Use AssetFinder to find subdomains
-domain = "example.com"  # Replace with your target domain
-finder = AssetFinder()
-subdomains = finder.find_subdomains(domain)
+# Step 1: Parse command line arguments
+parser = argparse.ArgumentParser(description='Check subdomains for cached .js files')
+parser.add_argument('-t', '--target', type=str, required=True, help='Target domain')
+parser.add_argument('-o', '--output', type=str, required=True, help='Output file name')
+args = parser.parse_args()
 
-# Step 2: Use httpx to filter live subdomains
-client = Client()
-live_subdomains = []
-for subdomain in subdomains:
-    url = f"http://{subdomain}.{domain}"
-    try:
-        response = client.head(url)
-        if response.status_code < 400:
-            live_subdomains.append(subdomain)
-    except:
-        pass
+# Define domain as target
+domain = args.target
+
+# Step 2: Use assetfinder to find subdomains
+subdomains = subprocess.check_output(['assetfinder', domain]).decode('utf-8').splitlines()
+
 
 # Step 3: Use cache-checker to check for cached versions for each live subdomain
 cache_info_dict = {}
